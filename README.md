@@ -1,20 +1,24 @@
 # Simulation-of-Autonomous-Road-Merging
 
-## AFEKA - Tel-Aviv Academic College Of Engineering
-### Department: Intelligent Systems
-### Course: Autonomous Vehicle
+## AFEKA - Tel-Aviv Academic College Of Engineering  
+Department: Intelligent Systems  
+Course: Autonomous Vehicle
 
 ---
 
 **Course project:** Development of an autonomous road merging simulation with adaptive learning behavior.  
+The simulation models autonomous vehicle merging from a secondary road into a main traffic road.
+
 **Project Completion Date:** 2024  
-**Tools:** Python, Pygame
+
+**Development Tools:** Python, Pygame  
+
+**Main Concepts:**  
+Adaptive security area, autonomous merging logic, collision detection, state-machine based control, dynamic traffic simulation.
 
 ---
 
 ## Overview
-
-The goal of this project is to simulate autonomous vehicle merging from a secondary road into a main traffic road.
 
 The project was inspired by:
 - adaptive cruise control systems,
