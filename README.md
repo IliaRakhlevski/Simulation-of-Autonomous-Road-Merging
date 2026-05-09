@@ -7,8 +7,6 @@
 **Course project:** Development of an autonomous road merging simulation with adaptive learning behavior.  
 The simulation models autonomous vehicle merging from a secondary road into a main traffic road.
 
-**Project Completion Date:** 2024  
-
 **Development Tools:** Python, Pygame  
 
 **Main Concepts:**  
