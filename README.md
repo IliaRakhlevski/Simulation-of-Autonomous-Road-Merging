@@ -12,6 +12,8 @@
 
 ---
 
+## Overview
+
 The goal of this project is to simulate autonomous vehicle merging from a secondary road into a main traffic road.
 
 The project was inspired by:
@@ -41,6 +43,24 @@ The adaptive learning mechanism updates the security area near the merge point a
 - previous failures.
 
 If collisions continue to occur, the security area increases dynamically in order to create safer merging behavior.
+
+---
+
+## Core Idea
+
+The project is inspired by slot-based autonomous merging approaches such as iPCB and GeoACC.
+
+The main idea is to create a dynamic security area near the merge point and allow the ego vehicle to enter the main road only when the area is considered safe.
+
+The security area adapts according to:
+- previous collisions,
+- traffic speed,
+- collision direction,
+- environment behavior over time.
+
+This creates a simple adaptive learning mechanism that improves merging behavior after failures.
+
+![Core Idea](image/core_idea.png)
 
 ---
 
