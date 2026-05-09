@@ -1,8 +1,8 @@
 # Simulation-of-Autonomous-Road-Merging
 
-## AFEKA - Tel-Aviv Academic College Of Engineering  
-Department: Intelligent Systems  
-Course: Autonomous Vehicle
+## AFEKA - Tel-Aviv Academic College Of Engineering
+## Department: Intelligent Systems
+## Course: Autonomous Vehicle
 
 ---
 
