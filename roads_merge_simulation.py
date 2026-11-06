@@ -107,8 +107,10 @@ class PlayerCar:
         
         
     # initialize the player car
-    def ResetPlayerCar(self):
- 
+    # new_episode - if a new episode must be counted by the environment
+    #               (False after a crash: the crash episode is already counted)
+    def ResetPlayerCar(self, new_episode = True):
+
         # move to start of the secondary road
         self.playerRect.move_ip(X_START_SEC_ROAD + 15 - self.playerRect.left, WINDOW_HEIGHT - CAR_HEIGHT - self.playerRect.top)
         # car angle is equal to secondary road angle
@@ -119,8 +121,9 @@ class PlayerCar:
         # player car acceleration and steering angle
         self.player_car_accel = 0
         self.player_car_steer = 0
-        
-        self.env.ResetPlayerCar()
+
+        if new_episode:
+            self.env.ResetPlayerCar()
   
       
     # process the player car crash   
@@ -132,7 +135,7 @@ class PlayerCar:
             if self.player_car_crash_counter == (FPS // 2):     # if the crash process passed half second
                                                               
                 # return the player car to the start position in the secondary road
-                self.ResetPlayerCar()
+                self.ResetPlayerCar(new_episode = False)
                 self.player_car_speed = 0
                 self.is_collision = False
             # end of the crash process
@@ -301,7 +304,7 @@ class Environment:
         self.UpdateTrafficCarsSpeed()
           
         # update traffic cars   
-        for tc in self.traffic_cars:
+        for tc in self.traffic_cars[:]:             # iterate over a copy, because cars are removed from the list
             tc['rect'].move_ip(tc['speed'], 0)      # update the traffic cars positions
             if tc['rect'].left > WINDOW_WIDTH:      # if a traffic car exits the window
                     self.traffic_cars.remove(tc)    # remove it from the traffic cars list
@@ -418,6 +421,12 @@ class Environment:
     # environment step - performing actions in the environment
     def Step(self):
 
+        # during the crash process the player car is not controlled:
+        # only the crash process is performed, it returns the car to the start position
+        if self.playerCar.player_car_crash:
+            self.playerCar.CrashProcess()
+            return
+
         # the player car start on the secondary road
         if self.current_player_car_state == STATE_START_SEC_ROAD:
             
@@ -454,7 +463,6 @@ class Environment:
             self.playerCar.player_car_steer = PLAYER_CAR_TURN_STEER
             if self.playerCar.player_car_speed >= PLAYER_CAR_TURN_SPEED:
                 self.playerCar.player_car_accel = 0
-                self.playerCar.player_car_speed == 0
             
             # if it is the first episode 
             if self.num_episodes == 0:
@@ -499,9 +507,13 @@ class Environment:
             self.playerCar.is_collision = True
             
             self.update_coll_shifts()
-            self.ResetPlayerCar()
+
+            # the episode is finished by the crash
+            # (the crash process returns the car to the start position without counting the episode again)
+            self.num_episodes += 1
             self.num_crashes += 1
             self.num_episodes_since_last_crash = 0
+            self.current_player_car_state = STATE_START_SEC_ROAD
 
         # process the player car crash if it exists
         self.playerCar.CrashProcess()
