@@ -42,7 +42,8 @@ The adaptive learning mechanism updates the security area near the merge point a
 - traffic speed,
 - previous failures.
 
-If collisions continue to occur, the security area increases dynamically in order to create safer merging behavior.
+The security area grows after a crash, on the side the collision came from, and slowly shrinks
+while there are no crashes, to reduce waiting. See [Algorithm](#algorithm) for the exact rules.
 
 ---
 
@@ -61,6 +62,88 @@ The security area adapts according to:
 This creates a simple adaptive learning mechanism that improves merging behavior after failures.
 
 ![Core Idea](image/core_idea.png)
+
+---
+
+## Algorithm
+
+The simulation runs at 40 frames per second. Traffic cars enter the main road on the left every
+40 frames with a random speed of 3–6 px/frame and drive to the right; a faster car that comes
+within 100 px of a slower car ahead takes its speed. The ego vehicle starts on the secondary road
+at 10 px/frame and has to join the main road at the merge point.
+
+### Merge state machine
+
+`Step()` is called every frame and moves the ego vehicle through these states:
+
+```mermaid
+stateDiagram-v2
+    [*] --> Start
+    Start --> SlowDown: 52 px before the merge point
+    SlowDown --> Turn: 10 px before the merge point,<br/>security area empty
+    SlowDown --> Wait: 10 px before the merge point,<br/>security area occupied
+    Wait --> Turn: security area empty
+    Turn --> SpeedUp: parallel to the main road
+    SpeedUp --> RegularSpeed: target speed reached
+    RegularSpeed --> [*]: leaves the window (success)
+    SlowDown: Slow Down
+    SpeedUp: Speed Up
+    RegularSpeed: Regular Speed
+    note right of Turn
+        A collision in any state ends the episode as a crash:
+        the security area is updated and the ego vehicle
+        starts again from Start.
+    end note
+```
+
+| State | What the ego vehicle does | Next state |
+|---|---|---|
+| Start | drives at 10 px/frame | Slow Down, 52 px before the merge point |
+| Slow Down | decelerates by 1 px/frame each frame, down to 3 px/frame | at 10 px before the merge point: Turn if the security area is empty, otherwise Wait |
+| Wait | stops and checks the security area every frame | Turn, as soon as the area is empty |
+| Turn | turns by 1° per frame at 3 px/frame until it is parallel to the main road | Speed Up |
+| Speed Up | accelerates by 1 px/frame each frame | Regular Speed, at 10 px/frame or at the speed of a slower car ahead in its lane |
+| Regular Speed | keeps its speed; traffic cars behind it slow down to it | the episode ends when it leaves the window |
+
+The slowdown point (52 px) is calculated from the deceleration, so that the car reaches the
+turning speed by the decision point. Once the turn has started, the decision is not changed.
+
+### Security area check
+
+![Security area check](image/security_area.png)
+
+Before turning, `if_allow_turn()` checks that no traffic car has its front edge inside the
+security area:
+
+```
+X_MERGE − left_coll_shift × speed × tc_speed_factor  <  front edge  <  X_MERGE + right_coll_shift × speed × tc_speed_factor
+```
+
+`speed` is the speed of that traffic car. In effect, `shift × tc_speed_factor` is a time margin
+in frames, and multiplying it by the car's speed turns it into a distance: a fast car is taken
+into account farther from the merge point than a slow one.
+
+- The **left** part covers cars approaching the merge point (they could hit the ego vehicle from behind).
+- The **right** part covers cars that have just passed it (the ego vehicle could hit them).
+- Only the lanes the ego vehicle crosses during the turn are checked: the top border is the highest
+  point the ego vehicle reaches while turning in the first episode.
+
+At the start both shifts are 0, so the area is empty and the ego vehicle merges without waiting.
+
+### Learning
+
+The security area is updated by two rules:
+
+- **After a crash, it grows** (`update_coll_shifts()`): if a traffic car hit the ego vehicle
+  from behind, `left_coll_shift` increases by 5; if the ego vehicle hit a car ahead,
+  `right_coll_shift` increases by 5. In both cases `tc_speed_factor` is multiplied by 1.05.
+- **After every 10 episodes without a crash, it shrinks** (`ResetPlayerCar()`):
+  `tc_speed_factor` is multiplied by 0.95.
+
+The shifts never decrease: they learn the *shape* of the area, i.e. from which side crashes come.
+`tc_speed_factor` sets its overall *scale*: it grows after crashes and slowly shrinks while there
+are none, which reduces waiting. With learning disabled the shifts stay 0, so the ego vehicle
+never waits.
 
 ---
 
@@ -98,8 +181,9 @@ after a crash, so the ego vehicle merges without checking the traffic.
 - **The security area learns fast:** the crash rate falls from about 47% to a few percent
   within the first 100 episodes.
 - **It does not go to zero by design:** after a crash the security area grows, and after every
-  10 episodes without crashes it shrinks a little (to reduce waiting). These two rules balance
-  at about 5–6% crashes – a trade-off between safety and waiting time.
+  10 episodes without crashes it shrinks by 5% to reduce waiting
+  (see [Learning](#learning)). These two rules balance at about 5–6% crashes –
+  a trade-off between safety and waiting time.
 - **The price of safety is waiting:** the ego vehicle waits more often before the merge point,
   so an episode lasts 7.8 s instead of 5.6 s.
 

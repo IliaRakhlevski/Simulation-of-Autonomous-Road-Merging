@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="500" viewBox="0 0 1120 500" font-family="'Segoe UI', Arial, Helvetica, sans-serif">
+  <rect width="1120" height="500" fill="#fcfcfb"/>
+
+  <!-- title -->
+  <text x="40" y="36" font-size="20" font-weight="700" fill="#0b0b0b">Security area check</text>
+  <text x="40" y="60" font-size="14" fill="#52514e">A traffic car blocks the merge if its front edge is inside the area · speed = speed of that traffic car · schematic, not to scale</text>
+
+  <!-- roads -->
+  <rect x="0" y="150" width="1120" height="120" fill="#ecebe7"/>
+  <polygon points="270,500 500,270 580,270 350,500" fill="#ecebe7"/>
+  <line x1="0" y1="150" x2="1120" y2="150" stroke="#8a8984" stroke-width="3"/>
+  <line x1="0" y1="270" x2="500" y2="270" stroke="#8a8984" stroke-width="3"/>
+  <line x1="580" y1="270" x2="1120" y2="270" stroke="#8a8984" stroke-width="3"/>
+  <line x1="270" y1="500" x2="500" y2="270" stroke="#8a8984" stroke-width="3"/>
+  <line x1="350" y1="500" x2="580" y2="270" stroke="#8a8984" stroke-width="3"/>
+  <text x="16" y="174" font-size="13" fill="#52514e">traffic →</text>
+
+  <!-- security area -->
+  <rect x="180" y="200" width="680" height="70" fill="#2a78d6" fill-opacity="0.14" stroke="#2a78d6" stroke-width="2" stroke-dasharray="7 5"/>
+  <text x="190" y="262" font-size="13" font-weight="700" fill="#2a78d6">security area</text>
+
+  <!-- top border -->
+  <text x="872" y="205" font-size="13" fill="#2a78d6">top border: top_coll_shift</text>
+
+  <!-- merge point -->
+  <line x1="540" y1="112" x2="540" y2="290" stroke="#0b0b0b" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <text x="588" y="292" font-size="13" fill="#0b0b0b">merge point (X_MERGE)</text>
+
+  <!-- dimensions -->
+  <g stroke="#0b0b0b" stroke-width="1.5">
+    <line x1="180" y1="122" x2="860" y2="122"/>
+    <line x1="180" y1="114" x2="180" y2="130"/>
+    <line x1="860" y1="114" x2="860" y2="130"/>
+    <line x1="540" y1="114" x2="540" y2="130"/>
+  </g>
+  <text x="360" y="92" font-size="14" font-weight="700" fill="#0b0b0b" text-anchor="middle">left part: cars approaching</text>
+  <text x="360" y="110" font-size="13" fill="#52514e" text-anchor="middle">left_coll_shift × speed × tc_speed_factor</text>
+  <text x="700" y="92" font-size="14" font-weight="700" fill="#0b0b0b" text-anchor="middle">right part: cars just passed</text>
+  <text x="700" y="110" font-size="13" fill="#52514e" text-anchor="middle">right_coll_shift × speed × tc_speed_factor</text>
+
+  <!-- traffic cars -->
+  <rect x="100" y="224" width="60" height="24" rx="6" fill="#6b6a66"/>
+  <rect x="410" y="224" width="60" height="24" rx="6" fill="#6b6a66"/>
+  <rect x="600" y="166" width="60" height="24" rx="6" fill="#6b6a66"/>
+  <line x1="470" y1="218" x2="470" y2="254" stroke="#eb6834" stroke-width="3"/>
+  <text x="40" y="292" font-size="13" fill="#52514e">outside: ignored</text>
+  <text x="468" y="292" font-size="13" fill="#0b0b0b" text-anchor="end"><tspan font-weight="700">front edge inside:</tspan> ego waits</text>
+  <text x="672" y="183" font-size="13" fill="#52514e">above the top border: ignored</text>
+
+  <!-- ego vehicle -->
+  <g transform="translate(494 330) rotate(-45)">
+    <rect x="-28" y="-12" width="56" height="24" rx="6" fill="#eb6834"/>
+  </g>
+  <text x="330" y="364" font-size="13" font-weight="700" fill="#eb6834">ego vehicle</text>
+
+  <!-- learning rules -->
+  <text x="640" y="350" font-size="15" font-weight="700" fill="#0b0b0b">Learning</text>
+  <circle cx="646" cy="373" r="5" fill="#eb6834"/>
+  <text x="660" y="378" font-size="13" fill="#0b0b0b">Crash, a traffic car hit the ego vehicle from behind:</text>
+  <text x="660" y="396" font-size="13" fill="#52514e">left_coll_shift + 5,  tc_speed_factor × 1.05</text>
+  <circle cx="646" cy="419" r="5" fill="#eb6834"/>
+  <text x="660" y="424" font-size="13" fill="#0b0b0b">Crash, the ego vehicle hit a car ahead:</text>
+  <text x="660" y="442" font-size="13" fill="#52514e">right_coll_shift + 5,  tc_speed_factor × 1.05</text>
+  <circle cx="646" cy="465" r="5" fill="#2a78d6"/>
+  <text x="660" y="470" font-size="13" fill="#0b0b0b">10 episodes in a row without a crash:</text>
+  <text x="660" y="488" font-size="13" fill="#52514e">tc_speed_factor × 0.95  (the whole area shrinks)</text>
+</svg>
